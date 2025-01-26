@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tıklama Sayacı</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #1a1a1a;
+            --button-bg: #ff4444;
+            --button-hover: #ff6666;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --button-bg: #ff4444;
+            --button-hover: #ff6666;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #counter {
+            font-size: 20vw;
+            text-align: center;
+            transition: font-size 0.3s ease;
+            user-select: none;
+        }
+
+        .button-container {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        #reset-button, #theme-toggle {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        #theme-toggle {
+            background-color: #666;
+        }
+
+        #reset-button:hover, #theme-toggle:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.05);
+        }
+
+        #reset-button:active, #theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(128,128,128,0.8) 0%, rgba(128,128,128,0) 70%);
+            border-radius: 50%;
+            animation: clickEffect 0.5s ease-out;
+        }
+
+        @keyframes clickEffect {
+            from {
+                opacity: 1;
+                transform: scale(0);
+            }
+            to {
+                opacity: 0;
+                transform: scale(2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="counter">0</div>
+    <div class="button-container">
+        <button id="reset-button">Sıfırla</button>
+        <button id="theme-toggle">🌓</button>
+    </div>
+
+    <script>
+        // PWA kayıt
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+
+        const counter = document.getElementById('counter');
+        const resetButton = document.getElementById('reset-button');
+        const themeToggle = document.getElementById('theme-toggle');
+        let count = parseInt(localStorage.getItem('clickCount')) || 0;
+        
+        // Tema yönetimi
+        const theme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', theme);
+
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function updateCounter() {
+            counter.textContent = count;
+            localStorage.setItem('clickCount', count);
+        }
+
+        function createClickEffect(e) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.style.width = '100px';
+            effect.style.height = '100px';
+            effect.style.left = (e.clientX - 50) + 'px';
+            effect.style.top = (e.clientY - 50) + 'px';
+            document.body.appendChild(effect);
+
+            effect.addEventListener('animationend', () => {
+                effect.remove();
+            });
+        }
+
+        function adjustFontSize() {
+            const numberLength = count.toString().length;
+            if (numberLength > 5) {
+                counter.style.fontSize = `${Math.max(8, 20 - numberLength)}vw`;
+            } else {
+                counter.style.fontSize = '20vw';
+            }
+        }
+
+        updateCounter();
+
+        document.body.addEventListener('click', (e) => {
+            if (e.target !== resetButton && e.target !== themeToggle) {
+                count++;
+                updateCounter();
+                createClickEffect(e);
+                adjustFontSize();
+            }
+        });
+
+        resetButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            count = 0;
+            updateCounter();
+            adjustFontSize();
+        });
+
+        themeToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleTheme();
+        });
+
+        // Sayfa yüklendiğinde font boyutunu ayarla
+        adjustFontSize();
+    </script>
+</body>
+</html> 
