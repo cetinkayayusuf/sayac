@@ -1,8 +1,8 @@
 {
   "name": "Tıklama Sayacı",
   "short_name": "Sayaç",
-  "description": "Basit ve eğlenceli bir tıklama sayacı",
-  "start_url": "/",
+  "description": "Tıklama sayacı",
+  "start_url": "/sayac",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1a1a1a",

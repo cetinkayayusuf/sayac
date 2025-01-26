@@ -154,12 +154,12 @@
         }
 
         function adjustFontSize() {
-            const numberLength = count.toString().length;
-            if (numberLength > 5) {
-                counter.style.fontSize = `${Math.max(8, 20 - numberLength)}vw`;
-            } else {
-                counter.style.fontSize = '20vw';
-            }
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Calculate font size based on the smaller dimension
+            const fontSize = Math.min(viewportWidth, viewportHeight) / 2; // Adjust the divisor as needed
+            counter.style.fontSize = `${fontSize}px`;
         }
 
         updateCounter();
